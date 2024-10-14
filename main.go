@@ -9,7 +9,6 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-// Different states of the application
 type state int
 
 const (
@@ -27,13 +26,11 @@ type model struct {
 	currentState state
 }
 
-// Init is called when the program starts. It returns an initial command if any.
 func (m model) Init() tea.Cmd {
 	// No initial command, just return nil
 	return nil
 }
 
-// initialModel creates the initial state of the model
 func initialModel() model {
 	return model{
 		choices: []string{
@@ -53,7 +50,6 @@ func initialModel() model {
 	}
 }
 
-// Update handles messages based on user input.
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -72,7 +68,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.cursor++
 				}
 			case "enter":
-				// Store the selected prefix and switch to enterMessage state
 				m.selected = strings.SplitN(m.choices[m.cursor], ": ", 2)[0] + ": "
 				m.currentState = enterMessage
 			}
@@ -83,17 +78,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.quitting = true
 				return m, tea.Quit
 			case "enter":
-				// Perform git commit and switch to commitDone state
 				m.commit(m.selected + m.message)
 				m.currentState = commitDone
 				return m, tea.Quit
 			case "backspace":
-				// Remove the last character from the message
 				if len(m.message) > 0 {
 					m.message = m.message[:len(m.message)-1]
 				}
 			default:
-				// Append typed characters to the message
 				if msg.Type == tea.KeyRunes {
 					m.message += msg.String()
 				}
@@ -104,7 +96,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-// View renders the UI.
 func (m model) View() string {
 	if m.quitting {
 		return "Exiting...\n"
@@ -130,7 +121,6 @@ func (m model) View() string {
 	return ""
 }
 
-// commit runs git commit with the chosen prefix and message
 func (m *model) commit(commitMessage string) {
 	cmd := exec.Command("git", "commit", "-m", commitMessage)
 	cmd.Stdout = os.Stdout
@@ -146,7 +136,6 @@ func (m *model) commit(commitMessage string) {
 func main() {
 	m := initialModel()
 
-	// Start the program
 	p := tea.NewProgram(m)
 
 	if err := p.Start(); err != nil {

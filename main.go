@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 type state int
@@ -15,6 +16,11 @@ const (
 	choosePrefix state = iota
 	enterMessage
 	commitDone
+)
+
+var (
+	itemStyle         = lipgloss.NewStyle().PaddingLeft(4)
+	selectedItemStyle = lipgloss.NewStyle().PaddingLeft(2).Foreground(lipgloss.Color("170"))
 )
 
 type model struct {
@@ -106,11 +112,14 @@ func (m model) View() string {
 		s := "Choose a commit message prefix:\n\n"
 		for i, choice := range m.choices {
 			cursor := " "
+			line := itemStyle.Render(choice)
+
 			if m.cursor == i {
 				cursor = ">"
+				line = selectedItemStyle.Render(choice)
 			}
 
-			s += fmt.Sprintf("%s %s\n", cursor, choice)
+			s += fmt.Sprintf("%s %s\n", cursor, line)
 		}
 		return s
 	case enterMessage:

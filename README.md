@@ -33,6 +33,11 @@ go build -o simple-git-cz
 sudo mv simple-git-cz /usr/local/bin
 ```
 
+### `emojis.json`のpathを環境変数に設定
+```bash
+export EMOJI_FILE=/path/to/your/emojis.json
+```
+
 ### 動かす
 ```bash
 simple-git-cz

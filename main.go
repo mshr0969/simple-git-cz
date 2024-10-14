@@ -28,7 +28,6 @@ var (
 	itemStyle         = lipgloss.NewStyle().PaddingLeft(4)
 	selectedItemStyle = lipgloss.NewStyle().PaddingLeft(2).Foreground(lipgloss.Color("170"))
 	emojiMap          = map[string][]string{}
-	emojiFile         = "emojis.json"
 )
 
 type model struct {
@@ -171,6 +170,10 @@ func loadEmojis(filename string) {
 }
 
 func main() {
+	emojiFile := os.Getenv("EMOJI_FILE")
+	if emojiFile == "" {
+		log.Fatalf("EMOJI_FILE is not set")
+	}
 	loadEmojis(emojiFile)
 
 	m := initialModel()

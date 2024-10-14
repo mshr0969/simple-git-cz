@@ -34,6 +34,7 @@ sudo mv simple-git-cz /usr/local/bin
 ```
 
 ### `emojis.json`のpathを環境変数に設定
+` ~/.bashrc` や `~/.zshrc` への追加
 ```bash
 export EMOJI_FILE=/path/to/your/emojis.json
 ```

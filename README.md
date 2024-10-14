@@ -2,8 +2,8 @@
 gitのコミットメッセージを簡単に書くためのCLIツール
 
 ## Example
-![example](render1728894358336.gif)
-![example](commits.png)
+![example](images/render1728894358336.gif)
+![example](images/commits.png)
 
 ## Features
 - コミットメッセージにつけるprefixを選んで入力を行う

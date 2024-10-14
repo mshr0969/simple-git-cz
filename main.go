@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -22,6 +24,17 @@ var (
 	itemStyle         = lipgloss.NewStyle().PaddingLeft(4)
 	selectedItemStyle = lipgloss.NewStyle().PaddingLeft(2).Foreground(lipgloss.Color("170"))
 )
+
+var emojiMap = map[string][]string{
+	"feat":     {"✨", "🚀", "🎉"},
+	"fix":      {"🐛", "🔧", "🚑️"},
+	"docs":     {"📚", "✏️", "📝"},
+	"style":    {"🎨", "💄", "🎯"},
+	"refactor": {"♻️", "🛠️", "🔄"},
+	"perf":     {"⚡", "🔥", "💨"},
+	"test":     {"✅", "🧪", "📊"},
+	"chore":    {"🧹", "📦", "🔒"},
+}
 
 type model struct {
 	choices      []string
@@ -74,7 +87,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.cursor++
 				}
 			case "enter":
-				m.selected = strings.SplitN(m.choices[m.cursor], ": ", 2)[0] + ": "
+				prefix := strings.SplitN(m.choices[m.cursor], ":", 2)[0]
+				m.selected = prefix + ": " + randomEmoji(prefix) + " "
 				m.currentState = enterMessage
 			}
 
@@ -140,6 +154,14 @@ func (m *model) commit(commitMessage string) {
 		fmt.Println("Failed to commit:", err)
 		os.Exit(1)
 	}
+}
+
+func randomEmoji(prefix string) string {
+	if emojis, ok := emojiMap[prefix]; ok {
+		rand.Seed(time.Now().UnixNano())
+		return emojis[rand.Intn(len(emojis))]
+	}
+	return ""
 }
 
 func main() {

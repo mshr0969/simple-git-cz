@@ -1,7 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"math/rand"
 	"os"
 	"os/exec"
@@ -24,18 +27,9 @@ const (
 var (
 	itemStyle         = lipgloss.NewStyle().PaddingLeft(4)
 	selectedItemStyle = lipgloss.NewStyle().PaddingLeft(2).Foreground(lipgloss.Color("170"))
+	emojiMap          = map[string][]string{}
+	emojiFile         = "emojis.json"
 )
-
-var emojiMap = map[string][]string{
-	"feat":     {"✨", "🚀", "🎉"},
-	"fix":      {"🐛", "🔧", "🚑️"},
-	"docs":     {"📚", "✏️", "📝"},
-	"style":    {"🎨", "💄", "🎯"},
-	"refactor": {"♻️", "🛠️", "🔄"},
-	"perf":     {"⚡", "🔥", "💨"},
-	"test":     {"✅", "🧪", "📊"},
-	"chore":    {"🧹", "📦", "🔒"},
-}
 
 type model struct {
 	choices      []string
@@ -164,9 +158,22 @@ func randomEmoji(prefix string) string {
 	return ""
 }
 
-func main() {
-	m := initialModel()
+func loadEmojis(filename string) {
+	data, err := ioutil.ReadFile(filename)
+	if err != nil {
+		log.Fatalf("Failed to read emoji file: %v", err)
+	}
 
+	err = json.Unmarshal(data, &emojiMap)
+	if err != nil {
+		log.Fatalf("Failed to parse emoji file: %v", err)
+	}
+}
+
+func main() {
+	loadEmojis(emojiFile)
+
+	m := initialModel()
 	p := tea.NewProgram(m)
 
 	if err := p.Start(); err != nil {

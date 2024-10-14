@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
@@ -40,16 +41,18 @@ type model struct {
 	choices      []string
 	cursor       int
 	selected     string
-	message      []rune
+	message      textinput.Model // テキスト入力用のモデル
 	quitting     bool
 	currentState state
 }
 
-func (m model) Init() tea.Cmd {
-	return nil
-}
-
 func initialModel() model {
+	ti := textinput.New()
+	ti.Placeholder = "Enter your commit message"
+	ti.Focus()
+	ti.CharLimit = 156
+	ti.Width = 40
+
 	return model{
 		choices: []string{
 			"feat: A new feature",
@@ -62,13 +65,17 @@ func initialModel() model {
 			"chore: Other changes that don't modify src or test files",
 		},
 		cursor:       0,
-		selected:     "",
-		message:      []rune{},
+		message:      ti,
 		currentState: choosePrefix,
 	}
 }
 
+func (m model) Init() tea.Cmd {
+	return textinput.Blink
+}
+
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch m.currentState {
@@ -97,24 +104,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.quitting = true
 				return m, tea.Quit
 			case "enter":
-				m.commit(m.selected + string(m.message))
+				m.commit(m.selected + m.message.Value())
 				m.currentState = commitDone
 				return m, tea.Quit
-			case "backspace":
-				if len(m.message) > 0 {
-					m.message = m.message[:len(m.message)-1]
-				}
-			case " ":
-				m.message = append(m.message, ' ')
-			default:
-				if msg.Type == tea.KeyRunes {
-					m.message = append(m.message, msg.Runes...)
-				}
 			}
+
+			m.message, cmd = m.message.Update(msg)
 		}
 	}
 
-	return m, nil
+	return m, cmd
 }
 
 func (m model) View() string {
@@ -138,7 +137,7 @@ func (m model) View() string {
 		}
 		return s
 	case enterMessage:
-		return fmt.Sprintf("Enter your commit message (starting with %s):\n\n%s%s", m.selected, m.selected, string(m.message))
+		return fmt.Sprintf("Enter your commit message (starting with %s):\n\n%s%s", m.selected, m.selected, m.message.View())
 	case commitDone:
 		return "Commit complete!\n"
 	}

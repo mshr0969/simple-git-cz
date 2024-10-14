@@ -105,6 +105,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if len(m.message) > 0 {
 					m.message = m.message[:len(m.message)-1]
 				}
+			case " ":
+				m.message += " "
 			default:
 				if msg.Type == tea.KeyRunes {
 					m.message += msg.String()

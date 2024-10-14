@@ -40,13 +40,12 @@ type model struct {
 	choices      []string
 	cursor       int
 	selected     string
-	message      string
+	message      []rune
 	quitting     bool
 	currentState state
 }
 
 func (m model) Init() tea.Cmd {
-	// No initial command, just return nil
 	return nil
 }
 
@@ -56,7 +55,7 @@ func initialModel() model {
 			"feat: A new feature",
 			"fix: A bug fix",
 			"docs: Documentation only changes",
-			"style: Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)",
+			"style: Changes that do not affect the code meaning (white-space, formatting, etc.)",
 			"refactor: A code change that neither fixes a bug nor adds a feature",
 			"perf: A code change that improves performance",
 			"test: Adding missing tests or correcting existing tests",
@@ -64,7 +63,7 @@ func initialModel() model {
 		},
 		cursor:       0,
 		selected:     "",
-		message:      "",
+		message:      []rune{},
 		currentState: choosePrefix,
 	}
 }
@@ -98,7 +97,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.quitting = true
 				return m, tea.Quit
 			case "enter":
-				m.commit(m.selected + m.message)
+				m.commit(m.selected + string(m.message))
 				m.currentState = commitDone
 				return m, tea.Quit
 			case "backspace":
@@ -106,10 +105,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.message = m.message[:len(m.message)-1]
 				}
 			case " ":
-				m.message += " "
+				m.message = append(m.message, ' ')
 			default:
 				if msg.Type == tea.KeyRunes {
-					m.message += msg.String()
+					m.message = append(m.message, msg.Runes...)
 				}
 			}
 		}
@@ -139,7 +138,7 @@ func (m model) View() string {
 		}
 		return s
 	case enterMessage:
-		return fmt.Sprintf("Enter your commit message (starting with %s):\n\n%s%s", m.selected, m.selected, m.message)
+		return fmt.Sprintf("Enter your commit message (starting with %s):\n\n%s%s", m.selected, m.selected, string(m.message))
 	case commitDone:
 		return "Commit complete!\n"
 	}

@@ -31,12 +31,12 @@ var (
 )
 
 type model struct {
-	choices      []string
-	cursor       int
-	selected     string
+	choices      []string        // CLIに表示するアイテム
+	cursor       int             // カーソルの位置
+	selected     string          // 選択されたアイテム
 	message      textinput.Model // テキスト入力用のモデル
-	quitting     bool
-	currentState state
+	quitting     bool            // 終了フラグ
+	currentState state           // 状態
 }
 
 func initialModel() model {
